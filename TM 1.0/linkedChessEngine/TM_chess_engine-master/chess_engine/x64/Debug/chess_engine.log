@@ -1,0 +1,11 @@
+﻿  ai.cpp
+  board.cpp
+  chess_attacked.cpp
+  chess_engine.cpp
+  chess_moves.cpp
+  consts.cpp
+  saving.cpp
+  utils.cpp
+  Generating Code...
+C:\Users\seb\Desktop\linkedChessEngine\TM_chess_engine-master\chess_engine\ai.cpp(26,20): warning C4018:  '<': signed/unsigned mismatch
+  chess_engine.vcxproj -> C:\Users\seb\Desktop\linkedChessEngine\TM_chess_engine-master\x64\Debug\chess_engine.exe
