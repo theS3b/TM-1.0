@@ -11,7 +11,7 @@ Board select_best_move(Board& state, const unsigned int& depth, const bool& maxP
 	haswon = false;
 	posTable pt = posTable();
 	vector<Board> children = state.get_bitboard_children_cpp();
-	double best_value = MAX;
+	double best_value = maxPlayer ? MIN : MAX;
 	Board best_move;
 
 	unsigned size = (int)children.size();
@@ -75,12 +75,12 @@ double alphabeta(Board& state, const unsigned int& depth, const bool& maxPlayer,
 double heuristic_evaluation(Board& s, const bool& leaf, const posTable& postab, const unsigned & depth, const unsigned& init_depth)
 {
 	// material evaluation
-	double value = (double)(10 * ((signed)POPCNT(s.bit_board[wpawn]) - (signed)POPCNT(s.bit_board[bpawn])) );
+	double value = (double)(10 * (double)((signed)POPCNT(s.bit_board[wpawn]) - (signed)POPCNT(s.bit_board[bpawn])) );
 	value += (double)30 * ((signed)POPCNT(s.bit_board[wknight]) - (signed)POPCNT(s.bit_board[bknight]));
 	value += (double)30 * ((signed)POPCNT(s.bit_board[wbishop]) - (signed)POPCNT(s.bit_board[bbishop]));
 	value += (double)50 * ((signed)POPCNT(s.bit_board[wrook]) - (signed)POPCNT(s.bit_board[brook]));
 	value += (double)90 * ((signed)POPCNT(s.bit_board[wqueen]) - (signed)POPCNT(s.bit_board[bqueen]));
-	value += (double)900 * s.get_result(WHITE, leaf) * (depth + 1); // if there's checkmate
+	value += (double)900 * s.get_result(WHITE, leaf) * ((int)depth + 1); // if there's checkmate
 
 	if (POPCNT(get_all_pieces(s, s.player)) <= 5) {
 
@@ -118,7 +118,7 @@ double heuristic_evaluation(Board& s, const bool& leaf, const posTable& postab, 
 			value -= 2 * bkingEndGame[pos];
 		}
 
-		value -= 3 * (init_depth - depth);  // we want to checkmate asap
+		value -= 3 * (int)(init_depth - depth);  // we want to checkmate asap
 
 	}
 	else {

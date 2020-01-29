@@ -7,6 +7,7 @@
 #include <cstring>
 #include <csignal>
 #include "socket_connexion_python.h"
+#include "playingModes.h"
 
 #include "ai.h"
 #include "saving.h"
@@ -17,11 +18,6 @@ using namespace std;
 
 int main()
 {	
-	// Special variables
-	char bad_move[] = "BADMOVE";
-	char lost[] = "LO";
-	char win[] = "WI";
-	const short depth = 5;
 	// register signal SIGINT and signal handler  
 	signal(SIGINT, shutdownServer);
 
@@ -35,56 +31,28 @@ int main()
 			return 1;
 		}
 
-		while (true) {
-			cout << "[+] Creating board." << endl;
-			Board b = Board();
-
-
-			// Playing
-			cout << "[+] Begining to play." << endl;
-			bool haswon = false;
-			while (!haswon && b.get_bitboard_children_cpp().size() != 0) {
-				b.print();
-
-				bool legal_move = false;
-				while (!legal_move) {
-
-					// Receiving player move
-					string player_move = string(conn.recv_data());
-					cout << "[*] Receiving player move : " << player_move << "." << endl;
-
-					// Apply player move
-					legal_move = move_piece(b, player_move);
-					if (!legal_move)
-						conn.send_data(bad_move);
-				}
-
-				const Board before = b;
-				b = select_best_move(b, depth, false, haswon);
-				if (haswon) {
-					cout << "[++] WOW ! Vous avez gagné !" << endl;
-					conn.send_data(win);
-					break;
-				}
-				string reply = transform_chessboard_to_move_BLACK(before, b);
-
-				if (b.get_bitboard_children_cpp().size() == 0) {
-					cout << "[--] Vous avez perdu !" << endl;
-					reply += "#LO";
-				}
-				cout << "[*] Sending computer move " << reply << " to player." << endl;
-				conn.send_string(reply);
+		bool playing = true;
+		while (playing) {
+			cout << "*** MENU ***" << endl;
+			string mode = string(conn.recv_data());
+			if (mode == "HA") {
+				playingAgainstAi(conn);
+			}
+			else if (mode == "AA") {
+				AIvsAI(conn);
 			}
 
-			b.print();
-
 			// next action
+			cout << "[*] Waiting for next action." << endl;
 			string action = string(conn.recv_data());
-			if (action == "EN")
-				break;
-			else if (action == "ST")
+			if (action[0] == 'E' && action[1] == 'N') {
+				cout << "[*] Client shutting down." << endl;
+				playing = false;
+			}
+			else if (action[0] == 'S' && action[1] == 'T')
 				continue;
 		}
+
 		cout << "[*] Reopening port in a moment for maybe a new connection later." << endl;
 		Sleep(2000);  // wait 2 seconds before reopening the server
 	}

@@ -23,4 +23,4 @@ struct Board {
 };
 
 bool move_piece(Board & b, const std::string& pos);
-std::string transform_chessboard_to_move_BLACK(const Board& from, const Board& to);
+std::string transform_chessboard_to_move(const Board& from, const Board& to, const short & player);

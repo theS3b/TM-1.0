@@ -158,8 +158,36 @@ bool move_piece(Board & b, const std::string & pos) {
 
 		uint64_t boardpos = b.bit_board[type_to_promote_to] | ((unsigned long long int)1 << to); // adding promoted piece
 		uint64_t secboardpos = b.bit_board[wpawn] ^ (((unsigned long long int)1 << from) & b.bit_board[type]); // removing pawn
+
+		// test if legal move
 		for (int i = 0; i < (int)children.size(); i++) {
 			if (children[i].bit_board[type_to_promote_to] == boardpos && children[i].bit_board[wpawn] == secboardpos) {
+				b = children[i];
+				return true;
+			}
+		}
+	}
+	else if (type == bpawn && pos[3] == '1') {
+		unsigned type_to_promote_to = notype;
+		std::cout << "What kind of piece would you want to promote your pawn to ? (0 for knight, 1 for bishop, 2 for rook, 3 for queen) : ";
+		std::string piece_type = "";
+		std::getline(std::cin, piece_type);
+
+		if (piece_type == "0")
+			type_to_promote_to = bknight;
+		else if (piece_type == "1")
+			type_to_promote_to = bbishop;
+		else if (piece_type == "2")
+			type_to_promote_to = brook;
+		else if (piece_type == "3")
+			type_to_promote_to = bqueen;
+		else
+			type_to_promote_to = bqueen;
+
+		uint64_t boardpos = b.bit_board[type_to_promote_to] | ((unsigned long long int)1 << to); // adding promoted piece
+		uint64_t secboardpos = b.bit_board[bpawn] ^ (((unsigned long long int)1 << from) & b.bit_board[type]); // removing pawn
+		for (int i = 0; i < (int)children.size(); i++) {
+			if (children[i].bit_board[type_to_promote_to] == boardpos && children[i].bit_board[bpawn] == secboardpos) {
 				b = children[i];
 				return true;
 			}
@@ -178,49 +206,91 @@ bool move_piece(Board & b, const std::string & pos) {
 	return false;
 }
 
-std::string transform_chessboard_to_move_BLACK(const Board& from, const Board& to)
+std::string transform_chessboard_to_move(const Board& from, const Board& to, const short & player)
 {
-	
-	// Right roque
-	if ((from.bit_board[bking] & 0x800000000000000) != 0 && (to.bit_board[bking] & 0x200000000000000) != 0) {
-		char ret[] = "e8g8#h8f8";
-		return ret;
-	}
-	// Left roque
-	else if ((from.bit_board[bking] & 0x800000000000000) != 0 && (to.bit_board[bking] & 0x2000000000000000) != 0) {
-		char ret[] = "e8c8#a8d8";
-		return ret;
-	}
-
 	std::string ret = "";
-	// Promotion
-	if (POPCNT(from.bit_board[bpawn]) != POPCNT(to.bit_board[bpawn])) {
-		ret = "PR";
-	}
 
-	// Normal move
-	short i = 0;
-	for (i = bpawn; i < notype; i += 2) {
-		if (from.bit_board[i] != to.bit_board[i])
-			break;
+	if (player == WHITE) {
+		// Right roque
+		if ((from.bit_board[wking] & 0x8) != 0 && (to.bit_board[wking] & 0x2) != 0) {
+			char ret[] = "e1g1#h1f1";
+			return ret;
+		}
+		// Left roque
+		else if ((from.bit_board[bking] & 0x8) != 0 && (to.bit_board[bking] & 0x20) != 0) {
+			char ret[] = "e1c1#a1d1";
+			return ret;
+		}
+
+		// Promotion
+		if (POPCNT(from.bit_board[wpawn]) != POPCNT(to.bit_board[wpawn])) {
+			ret = "PR";
+		}
+
+		// Normal move
+		short i = 0;
+		for (i = wpawn; i < notype; i += 2) {
+			if (from.bit_board[i] != to.bit_board[i])
+				break;
+		}
+		uint64_t before = from.bit_board[i];
+		uint64_t after = to.bit_board[i];
+		before &= before ^ after;
+		after &= from.bit_board[i] ^ after;
+
+		short before_case = LOG2(before);
+		short after_case = LOG2(after);
+
+		std::cout << "move case :" << before_case << ", " << after_case << std::endl;
+
+		if (POPCNT(get_all_pieces(from, BLACK)) != POPCNT(get_all_pieces(to, BLACK))) {
+			uint64_t captured = get_all_pieces(from, BLACK) ^ get_all_pieces(to, BLACK);
+			ret += casenb_to_coo(LOG2(captured)) + "CB#";
+		}
+
+		ret += casenb_to_coo(before_case) + casenb_to_coo(after_case);
+	}
+	else {
+		// Right roque
+		if ((from.bit_board[bking] & 0x800000000000000) != 0 && (to.bit_board[bking] & 0x200000000000000) != 0) {
+			char ret[] = "e8g8#h8f8";
+			return ret;
+		}
+		// Left roque
+		else if ((from.bit_board[bking] & 0x800000000000000) != 0 && (to.bit_board[bking] & 0x2000000000000000) != 0) {
+			char ret[] = "e8c8#a8d8";
+			return ret;
+		}
+		// Promotion
+		if (POPCNT(from.bit_board[bpawn]) != POPCNT(to.bit_board[bpawn])) {
+			ret = "PR";
+		}
+
+		// Normal move
+		short i = 0;
+		for (i = bpawn; i < notype; i += 2) {
+			if (from.bit_board[i] != to.bit_board[i])
+				break;
+		}
+		uint64_t before = from.bit_board[i];
+		uint64_t after = to.bit_board[i];
+		before &= before ^ after;
+		after &= from.bit_board[i] ^ after;
+
+		short before_case = LOG2(before);
+		short after_case = LOG2(after);
+
+		std::cout << "move case :" << before_case << ", " << after_case << std::endl;
+
+		if (POPCNT(get_all_pieces(from, WHITE)) != POPCNT(get_all_pieces(to, WHITE))) {
+			uint64_t captured = get_all_pieces(from, WHITE) ^ get_all_pieces(to, WHITE);
+			ret += casenb_to_coo(LOG2(captured)) + "CW#";
+		}
+
+		ret += casenb_to_coo(before_case) + casenb_to_coo(after_case);
+
 	}
 	
-	uint64_t before = from.bit_board[i];
-	uint64_t after = to.bit_board[i];
-	before &= before ^ after;
-	after &= from.bit_board[i] ^ after;
-
-	short before_case = LOG2(before);
-	short after_case = LOG2(after);
-
-	std::cout << "move case :" << before_case << ", " << after_case << std::endl;
-
-	if (POPCNT(get_all_pieces(from, WHITE)) != POPCNT(get_all_pieces(to, WHITE))) {
-		uint64_t captured = get_all_pieces(from, WHITE) ^ get_all_pieces(to, WHITE);
-		ret += casenb_to_coo(LOG2(captured)) + "CA#";
-	}
-
-	ret += casenb_to_coo(before_case) + casenb_to_coo(after_case);
 	std::cout << ret << std::endl;
 	return ret;
 }

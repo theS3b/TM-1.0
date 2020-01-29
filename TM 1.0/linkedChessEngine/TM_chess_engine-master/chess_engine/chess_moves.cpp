@@ -37,7 +37,7 @@ unsigned int separate_moves(Board* res, const Board b, uint64_t attacked, const 
 
 	for (; i < nbr; i++, j++) {
 		unsigned int tmp = index + j;
-
+		
 		// Promotion
 		if (type <= bpawn) {
 			const uint64_t last_line = (preRes[i] & ((uint64_t)bit_line << 56));
@@ -61,13 +61,11 @@ unsigned int separate_moves(Board* res, const Board b, uint64_t attacked, const 
 					for (unsigned short t = opponent_type; t < notype; t += 2) {
 						res[tmp].bit_board[t] ^= (res[tmp].bit_board[t] & last_line);
 					}
-					i++;
 					j++;
 					tmp++;
 				}
 				// we'll add one already with the "more general" for loop
 				j--;
-				i--;
 				continue;
 			}
 			else if (b.player == BLACK && first_line) {
@@ -90,13 +88,11 @@ unsigned int separate_moves(Board* res, const Board b, uint64_t attacked, const 
 					for (unsigned short t = opponent_type; t < notype; t += 2) {
 						res[tmp].bit_board[t] ^= (res[tmp].bit_board[t] & first_line);
 					}
-					i++;
 					j++;
 					tmp++;
 				}
 				// we'll add one already with the "more general" for loop
 				j--;
-				i--;
 				continue;
 			}
 		}
@@ -269,7 +265,7 @@ unsigned int get_bitboard_children_PAWN(Board* res, unsigned int index, const un
 		attacked |= tmp | (tmp2 ^ (tmp2 & all_pieces));
 		break;
 	}
-
+	
 	return separate_moves(res, b, attacked, pos, type, index);
 }
 
