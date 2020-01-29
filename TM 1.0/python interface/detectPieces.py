@@ -7,6 +7,7 @@ Created on Wed Oct  9 17:15:19 2019
 from IOPi import IOPi
 import math
 import time
+from ledControl import is_big_activated
 
 busAB = IOPi(0x21)
 busDC = IOPi(0x20)
@@ -103,7 +104,7 @@ def case_index_to_coo(index):
     let = char[int(index % 8)]
     return let + str(n)
 
-def get_move():
+def get_move(option_of_quitting):
     piece_removed = False
     capturing_piece = False
 
@@ -115,6 +116,10 @@ def get_move():
     case_after = 0
     
     while True:
+        if is_big_activated() and option_of_quitting:
+            print("[*] Quitting.")
+            return "MENU"
+        
         bmap = get_board_map()
         nbr_pieces = get_nbr_pieces(bmap)
         
@@ -133,6 +138,11 @@ def get_move():
             boardr = bmap
             capturing_piece = True
             time.sleep(2)  # so there's less probability of catching the place moving
-
+        
         time.sleep(0.5)
-    return case_index_to_coo(math.log2(case_piecer)) + case_index_to_coo(math.log2(case_after))
+    
+    try:
+        ret = case_index_to_coo(math.log2(case_piecer)) + case_index_to_coo(math.log2(case_after))
+    except:
+        ret = "MULTIMOVE"
+    return ret

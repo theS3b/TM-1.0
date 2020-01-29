@@ -6,6 +6,8 @@ Created on Wed Oct  9 17:15:19 2019
 """
 
 SAFETY = 40  # the higher it is the less the algorithm will go through intersections
+W_ARR = 0
+B_ARR = 1
 
 class Node(object):
     def __init__(self, _x, _y, _parent, _c = 0, _h = 0):
@@ -93,8 +95,8 @@ def Astar(graph, start, end):
         
     return None
 
-def generate_graph(all_pieces, captured_pieces):
-    graph =[[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+def generate_graph(all_pieces, captured_pieces, player):
+    graph =[[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             [0,2,0,2,0,2,0,2,0,2,0,2,0,2,0],
             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -123,18 +125,22 @@ def generate_graph(all_pieces, captured_pieces):
             let_counter = 0
             nb_counter += 2
 
-    if captured_pieces > 15:
-        print("[-] There cannot be more than 15 captured pieces, there's :", captured_pieces)
+    if captured_pieces[player] > 15:
+        print("[-] There cannot be more than 15 captured pieces, there's :", captured_pieces[player])
         return None
     
     ci = 14
-    while ci > (14 - captured_pieces):
-        graph[0][ci] = 1
+    graph_i = 0
+    if player == B_ARR:
+        graph_i = 16
+
+    while ci > (14 - captured_pieces[player]):
+        graph[graph_i][ci] = 1
         ci -=1
     
     return graph
 
-def transform_coo_to_index(coo, captured_pieces):
+def transform_coo_to_index(coo, captured_pieces, player):
     let_to_i = {"a":14, "b":12, "c":10, "d":8, "e":6, "f":4, "g":2, "h":0}
     cfrom = coo[:2]
     cto = coo[2:]
@@ -143,10 +149,14 @@ def transform_coo_to_index(coo, captured_pieces):
     begin = (0,0)
 
     begin = (let_to_i[cfrom[0]], (int(cfrom[1]) -1)*2 + 1)
-    if cto == "CA":
-        end = (captured_pieces, 16)
+    if cto == "CW":
+        end = (captured_pieces[W_ARR], 16)
         print("Going to CAPTURED :", end)
-        captured_pieces += 1
+        captured_pieces[W_ARR] += 1
+    elif cto == "CB":
+        end = (captured_pieces[B_ARR], 0)
+        print("Going to CAPTURED :", end)
+        captured_pieces[B_ARR] += 1
     else:
         end = (let_to_i[cto[0]], (int(cto[1]) -1)*2 + 1)
 

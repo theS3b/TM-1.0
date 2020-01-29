@@ -33,6 +33,9 @@ def wait_for_big_activation():
     while busInt.read_pin(11) == 0:
         time.sleep(0.1)
 
+def is_big_activated():
+    return busInt.read_pin(11)
+
 def queen_or_knight():
     while True:
         if busInt.read_pin(9) == 1:
@@ -46,16 +49,19 @@ def check_next_action():
         time.sleep(0.2)
     if busInt.read_pin(11) == 1:
         big_light_on()
-        time.sleep(5)  # turn it off is longer
+        time.sleep(0.5)
         big_light_off()
+        time.sleep(3)  # turn it off is longer
+        big_light_on()
+
         if busInt.read_pin(11) == 1:
-            for z in range(3):
+            for z in range(2):
                 big_light_on()
                 little_light_on()
-                time.sleep(0.3)
+                time.sleep(0.2)
                 big_light_off()
                 little_light_off()
-                time.sleep(0.3)
-            return -1  # turn off
-        return 1  # new game
+                time.sleep(0.2)
+            return -1  # long wait action
+        return 1  # fast wait action
     return 0  # not possible

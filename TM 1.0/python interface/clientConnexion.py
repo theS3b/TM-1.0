@@ -15,7 +15,7 @@ CPPPORT = 62358
 class SocketConnexion(object):
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(("192.168.10.4", CPPPORT))
+        self.sock.connect(("192.168.10.3", CPPPORT))
     
     def send_data(self, str_data):
         self.sock.sendall(str_data.encode('ascii'))

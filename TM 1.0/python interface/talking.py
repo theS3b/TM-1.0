@@ -1,7 +1,7 @@
-import subprocess
+import os
 
 def saying_win():
-    subprocess.call(["aplay", "/home/pi/win.wav"])
+    os.system("./speak.sh /home/pi/win.wav")
 
 def saying_lost():
-    subprocess.call(["aplay", "/home/pi/lost.wav"])
+    os.system("./speak.sh /home/pi/lost.wav")
